@@ -7,15 +7,29 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "tsx src/index",
+    "start": "dotenv -- tsx src/index",
+    "dev": "dotenv -- nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dynatenshi/node-task-tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dynatenshi/node-task-tracker/issues"
+  },
+  "homepage": "https://github.com/dynatenshi/node-task-tracker#readme",
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/node": "^25.3.0",
+    "@types/sqlite3": "^3.1.11",
+    "dotenv-cli": "^11.0.0",
+    "nodemon": "^3.1.14",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "sqlite3": "^5.1.7"
   }
 }

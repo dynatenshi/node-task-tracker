@@ -1,4 +1,5 @@
 NodeTaskTracker.iml
 node_modules/
 .idea/
-.env
+*.env
+*.db
