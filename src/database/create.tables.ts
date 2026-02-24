@@ -22,7 +22,9 @@ export const createTables = async (): Promise<void> => {
       id TEXT PRIMARY KEY,
       text TEXT NOT NULL,
       column_id TEXT NOT NULL,
-        FOREIGN KEY (column_id) REFERENCES columns(id)
+      board_id TEXT NOT NULL,
+        FOREIGN KEY (column_id) REFERENCES columns(id),
+        FOREIGN KEY (board_id) REFERENCES boards(id)
     );
     `);
 }

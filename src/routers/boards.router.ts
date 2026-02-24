@@ -1,7 +1,7 @@
 import express from "express";
 import { randomUUID } from 'crypto';
 import type { Request, Response } from "express";
-import type { IdParams } from "../types/common/index.js";
+import type { BoardIdParams } from "../types/common/index.js";
 import type { Board, CreateBoardRequest, GetBoardsResponse } from '../types/boards/index.js';
 import { createBoard, updateBoard, deleteBoard, getOneBoard, getAllBoards } from "../database/repository/boards.repository.js";
 import { validateBoardInput } from "./validation/index.js";
@@ -13,8 +13,8 @@ boardsRouter.get('/', async (request: Request<{}, {}>, response: Response<GetBoa
     response.send(boards);
 });
 
-boardsRouter.get('/:id', async (request: Request<IdParams, {}>, response: Response<Board | string>) => {
-    const board = await getOneBoard(request.params.id);
+boardsRouter.get('/:boardId', async (request: Request<BoardIdParams, {}>, response: Response<Board | string>) => {
+    const board = await getOneBoard(request.params.boardId);
 
     if (!board) {
         return response.status(404).send('Board not found');
@@ -38,12 +38,12 @@ boardsRouter.post(
 });
 
 boardsRouter.put(
-    '/:id',
+    '/:boardId',
     validateBoardInput,
-    async (request: Request<IdParams, Board, CreateBoardRequest>, response: Response<Board>) => {
+    async (request: Request<BoardIdParams, Board, CreateBoardRequest>, response: Response<Board>) => {
     const board: Board = {
         name: request.body.name,
-        id: request.params.id
+        id: request.params.boardId
     };
 
     await updateBoard(board);
@@ -51,8 +51,8 @@ boardsRouter.put(
     response.send(board);
 });
 
-boardsRouter.delete('/:id', async (request: Request<IdParams>, response: Response<void>) => {
-    await deleteBoard(request.params.id);
+boardsRouter.delete('/:boardId', async (request: Request<BoardIdParams>, response: Response<void>) => {
+    await deleteBoard(request.params.boardId);
 
     response.sendStatus(204);
 });

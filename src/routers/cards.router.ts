@@ -1,20 +1,25 @@
 import express from "express";
 import { randomUUID } from 'crypto';
 import type { Request, Response } from "express";
-import type { IdParams } from "../types/common/index.js";
+import type {CardIdParams, ColumnIdParams} from "../types/common/index.js";
 import type { Card, CreateCardRequest, GetCardsResponse } from '../types/cards/index.js';
 import { createCard, updateCard, deleteCard, getOneCard, getAllCards } from "../database/repository/cards.repository.js";
 import { validateCardInput } from "./validation/index.js";
 
-export const cardsRouter = express.Router();
+export const cardsRouter = express.Router({ mergeParams: true });
 
-cardsRouter.get('/', async (request: Request<{}, {}>, response: Response<GetCardsResponse> ) => {
-    const cards = await getAllCards();
+cardsRouter.get('/', async (request: Request<ColumnIdParams, {}>, response: Response<GetCardsResponse> ) => {
+    const cards = await getAllCards(request.params.columnId, request.params.boardId);
     response.send(cards);
 });
 
-cardsRouter.get('/:id', async (request: Request<IdParams, {}>, response: Response<Card | string>) => {
-    const card = await getOneCard(request.params.id);
+cardsRouter.get(
+    '/:cardId',
+    async (
+        request: Request<CardIdParams, {}>,
+        response: Response<Card | string>
+    ) => {
+    const card = await getOneCard(request.params.cardId, request.params.columnId, request.params.boardId);
 
     if (!card) {
         return response.status(404).send('Card not found');
@@ -26,10 +31,15 @@ cardsRouter.get('/:id', async (request: Request<IdParams, {}>, response: Respons
 cardsRouter.post(
     '/',
     validateCardInput,
-    async (request: Request<{}, Card, CreateCardRequest>, response: Response<Card>) => {
+    async (
+        request: Request<ColumnIdParams, Card, CreateCardRequest>,
+        response: Response<Card>
+    ) => {
     const card: Card = {
         text: request.body.text,
-        id: randomUUID()
+        id: randomUUID(),
+        columnId: request.params.columnId,
+        boardId: request.params.boardId
     };
 
     await createCard(card);
@@ -38,12 +48,17 @@ cardsRouter.post(
 });
 
 cardsRouter.put(
-    '/:id',
+    '/:cardId',
     validateCardInput,
-    async (request: Request<IdParams, Card, CreateCardRequest>, response: Response<Card>) => {
+    async (
+        request: Request<CardIdParams, Card, CreateCardRequest>,
+        response: Response<Card>
+    ) => {
     const card: Card = {
         text: request.body.text,
-        id: request.params.id
+        id: request.params.cardId,
+        columnId: request.params.columnId,
+        boardId: request.params.boardId
     };
 
     await updateCard(card);
@@ -51,8 +66,13 @@ cardsRouter.put(
     response.send(card);
 });
 
-cardsRouter.delete('/:id', async (request: Request<IdParams>, response: Response<void>) => {
-    await deleteCard(request.params.id);
+cardsRouter.delete(
+    '/:cardId',
+    async (
+        request: Request<CardIdParams>,
+        response: Response<void>
+    ) => {
+    await deleteCard(request.params.cardId, request.params.columnId, request.params.boardId);
 
     response.sendStatus(204);
 });
