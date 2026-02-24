@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import type { IdParams } from "../types/common/index.js";
 import type { Card, CreateCardRequest, GetCardsResponse } from '../types/cards/index.js';
 import { createCard, updateCard, deleteCard, getOneCard, getAllCards } from "../database/repository/cards.repository.js";
+import { validateCardInput } from "./validation/index.js";
 
 export const cardsRouter = express.Router();
 
@@ -22,7 +23,10 @@ cardsRouter.get('/:id', async (request: Request<IdParams, {}>, response: Respons
     response.send(card);
 });
 
-cardsRouter.post('/', async (request: Request<{}, Card, CreateCardRequest>, response: Response<Card>) => {
+cardsRouter.post(
+    '/',
+    validateCardInput,
+    async (request: Request<{}, Card, CreateCardRequest>, response: Response<Card>) => {
     const card: Card = {
         text: request.body.text,
         id: randomUUID()
@@ -33,7 +37,10 @@ cardsRouter.post('/', async (request: Request<{}, Card, CreateCardRequest>, resp
     response.send(card);
 });
 
-cardsRouter.put('/:id', async (request: Request<IdParams, Card, CreateCardRequest>, response: Response<Card>) => {
+cardsRouter.put(
+    '/:id',
+    validateCardInput,
+    async (request: Request<IdParams, Card, CreateCardRequest>, response: Response<Card>) => {
     const card: Card = {
         text: request.body.text,
         id: request.params.id

@@ -1,6 +1,6 @@
 {
   "name": "node-task-tracker",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Task tracker on node.js",
   "license": "ISC",
   "author": "DarkSlayer",
