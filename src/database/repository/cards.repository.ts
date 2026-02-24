@@ -1,32 +1,39 @@
 import type {Card} from "../../types/cards/index.js";
+import type {CardIdParams, ColumnIdParams} from "../../types/common/index.js";
 import {sqliteAll, sqliteGet, sqliteRun} from "../db.connection.js";
 
 export const createCard = async (card: Card): Promise<void> => {
-    await sqliteRun(`
-    INSERT INTO cards (id, text, column_id, board_id)
-    VALUES (?, ?, ?, ?);
-    `, [card.id, card.text, card.columnId, card.boardId]);
+    await sqliteRun(
+        `
+    INSERT INTO cards (id, text, column_id)
+    VALUES (?, ?, ?);
+    `, [card.id, card.text, card.columnId]);
 }
 
 export const updateCard = async (card: Card): Promise<void> => {
-    await sqliteRun(`
+    await sqliteRun(
+        `
     UPDATE cards SET text = ?
-    WHERE id = ? AND column_id =? AND board_id = ?;
-    `, [card.text, card.id, card.columnId, card.boardId]);
+    WHERE id = ?;
+    `, [card.text, card.id]);
 }
 
-export const deleteCard = async (id: string, columnId: string, boardId: string): Promise<void> => {
-    await sqliteRun(`
+export const deleteCard = async (id: string): Promise<void> => {
+    await sqliteRun(
+        `
     DELETE FROM cards
-    WHERE id = ? AND column_id =? AND board_id = ?;
-    `, [id, columnId, boardId]);
+    WHERE id = ?;
+    `, [id]);
 }
 
-export const getOneCard = async (id: string, columnId: string, boardId: string): Promise<Card | null> => {
-    const data = await sqliteGet(`
-    SELECT * FROM cards
-    WHERE id = ? AND column_id =? AND board_id = ?;
-    `, [id, columnId, boardId]);
+export const getOneCard = async ({ cardId, columnId, boardId } :CardIdParams): Promise<Card | null> => {
+    const data = await sqliteGet(
+        `
+    SELECT cards.* FROM cards
+    LEFT JOIN columns 
+    ON cards.column_id = columns.id
+    WHERE cards.column_id = ? AND columns.id =? AND columns.board_id = ?;
+    `, [cardId, columnId, boardId]);
 
     if (isCard(data)) {
         return data;
@@ -35,10 +42,13 @@ export const getOneCard = async (id: string, columnId: string, boardId: string):
     return null;
 }
 
-export const getAllCards = async (columnId: string, boardId: string): Promise<Card[]> => {
-    const data = await sqliteAll(`
-    SELECT * FROM cards
-    WHERE column_id = ? AND board_id = ?;
+export const getAllCards = async ({ columnId, boardId }: ColumnIdParams): Promise<Card[]> => {
+    const data = await sqliteAll(
+        `
+    SELECT cards.* FROM cards
+    LEFT JOIN columns
+    ON cards.column_id = columns.id
+    WHERE cards.column_id = ? AND columns.board_id = ?;
     `, [columnId, boardId]);
 
     if (!Array.isArray(data)) {
